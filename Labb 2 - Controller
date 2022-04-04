@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Movies;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
+//Sorterar filmer i alfabetisk ordning
+class MoviesController extends Controller {
+ 
+    public function index() {
+
+       $Movies = Movies::all()->sortby('title', SORT_NATURAL|SORT_FLAG_CASE);
+       return $Movies; 
+    }
+
+
+//Hitta film med ID
+public function idindex($id) {
+            
+    $Movies = Movies::findOrFail($id);         
+    return $Movies;
+} 
+//Skapar filmer
+public function create(Request $request) {
+
+    $this -> validate($request, [
+        'title' => 'required | string', //required innebär att titel måste skrivas in
+        'year' => 'integer',
+        'genre' => 'string',
+        'rating' => 'integer'
+    ]);
+
+    Movies::create($request->all());
+    return ['success' => true];
+}
+    //Uppdaterar filmer
+    public function update(Request $request, $id) {
+        
+        $updated = Movies::findOrFail($id);
+        $data = $this -> validate($request, [
+            
+            'title' => 'filled | string',
+            'year' => 'filled | integer',
+            'genre' => 'filled | string',
+            'rating' => 'filled | integer'
+        
+        ]);
+
+        $updated -> fill($data);
+        $updated -> save();
+
+        return ['success' => true];
+    }
+    //Raderar filmer
+    public function delete($id) {
+
+        $Movies = Movies::findOrFail($id);
+        $Movies -> delete();
+
+        return ['success' => true];
+    }
+
+}
+
+?>
